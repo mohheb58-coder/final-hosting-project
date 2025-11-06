@@ -108,10 +108,11 @@
         
         async function loadData() {
             try {
-                // 🔴 نام فایل CSV شما: list.csv
-                const response = await fetch('list.csv'); 
-                const csvText = await response.text();
-                
+               // جایگزین کنید:
+// 'https://mohheb58-coder.github.io/final-hosting-project/list.csv'
+
+// مثلاً اگر کدتان این بود: fetch('/list.csv')
+fetch('https://mohheb58-coder.github.io/final-hosting-project/list.csv')
                 const rows = csvText.split('\n').filter(row => row.trim() !== '').slice(1);
                 
                 allStudents = rows.map((row) => {
@@ -355,5 +356,6 @@ const displayDate = date.toLocaleDateString();
 </body>
 
 </html>
+
 
 
