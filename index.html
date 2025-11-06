@@ -117,7 +117,8 @@
                 allStudents = rows.map((row) => {
                     // split بر اساس کاما (,) یا نقطه ویرگول (;) بر اساس نحوه ذخیره CSV در اکسل
                     // در این مرحله فرض می کنیم بر اساس کاما است. اگر خطا داد باید به ; تغییر دهیم.
-                    const columns = row.split(',').map(col => col.trim().replace(/"/g, ''));
+                   // ⚠️ این خط را تغییر دهید:
+const columns = row.split(';').map(col => col.trim().replace(/"/g, ''));
                     
                     // ستون‌ها بر اساس ساختار شما: 0:ID, 1:نام, 2:نام خانوادگی, 3:پایه, 4:کلاس, 5:معلم
                     const idIndex = 0;
@@ -354,3 +355,4 @@
 </body>
 
 </html>
+
