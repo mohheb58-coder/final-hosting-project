@@ -1,96 +1,4 @@
-<!DOCTYPE html>
-<html dir="rtl" lang="fa">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>سیستم ثبت غیبت دانش‌آموزان</title>
-        <script src="https://unpkg.com/jdate/jdate.min.js"></script>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Tahoma', 'Arial', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
-        .container { max-width: 1200px; margin: 0 auto; }
-        .header { background: white; padding: 25px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); margin-bottom: 30px; text-align: center; }
-        h1 { color: #667eea; margin-bottom: 10px; }
-        .tabs { display: flex; justify-content: center; margin-bottom: 20px; }
-        .tab-button { background: #f0f0f0; border: none; padding: 10px 20px; cursor: pointer; font-size: 16px; color: #333; transition: background 0.3s; border-radius: 8px 8px 0 0; margin: 0 2px; border-bottom: 3px solid transparent; }
-        .tab-button.active { background: #fff; color: #667eea; border-bottom: 3px solid #667eea; font-weight: bold; }
-        .tab-content { background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); display: none; }
-        .tab-content.active { display: block; }
-        .controls { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px; }
-        .date-display { font-size: 18px; font-weight: bold; color: #764ba2; }
-        .filter-group { display: flex; gap: 10px; align-items: center; }
-        select { padding: 8px; border-radius: 5px; border: 1px solid #ccc; font-size: 16px; }
-        #students-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 15px; margin-bottom: 20px; }
-        .student-item { background: #f9f9f9; padding: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; border: 1px solid #eee; transition: border 0.2s; cursor: pointer; }
-        .student-item.selected { background: #e6f7ff; border-color: #667eea; }
-        .student-info { display: flex; flex-direction: column; align-items: flex-start; }
-        .student-name { font-weight: bold; color: #333; font-size: 1.1em; }
-        .student-details { font-size: 0.9em; color: #666; margin-top: 5px; }
-        .student-index { font-weight: bold; color: #764ba2; margin-left: 10px; }
-        button { background: #667eea; color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; transition: background 0.3s, transform 0.1s; }
-        button:hover { background: #5a6edb; }
-        button:active { transform: scale(0.98); }
-        #status-message { margin-top: 20px; padding: 10px; border-radius: 8px; text-align: center; font-weight: bold; display: none; }
-        .success { background: #d4edda; color: #155724; }
-        .error { background: #f8d7da; color: #721c24; }
-        #manager-report-content { white-space: pre-wrap; font-family: Tahoma, Arial, monospace; background: #f0f0f0; padding: 15px; border-radius: 8px; min-height: 200px; border: 1px solid #ccc; margin-top: 20px; }
-        #records-search-tab { display: flex; flex-direction: column; gap: 20px; }
-        #records-search-input { padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 16px; width: 100%; max-width: 400px; margin-left: 10px; }
-        .search-controls { display: flex; align-items: center; gap: 10px; }
-        #records-search-result { margin-top: 15px; padding: 20px; border-radius: 8px; background: #e6f7ff; border: 1px solid #667eea; min-height: 100px; display: flex; align-items: center; justify-content: center; font-size: 1.1em; color: #333; text-align: center; flex-direction: column; }
-        .result-count { font-size: 2.5em; color: #764ba2; font-weight: bold; display: block; margin-top: 10px; }
-    </style>
-</head>
-<body>
-
-    <div class="container">
-        <div class="header">
-            <h1>سیستم ثبت و گزارش‌گیری غیبت دانش‌آموزان</h1>
-            <div class="date-display" id="date-display"></div>
-        </div>
-        
-        <div class="tabs">
-            <button class="tab-button active" onclick="openTab('absence-tab')">ثبت غیبت</button>
-            <button class="tab-button" onclick="openTab('manager-report-tab')">گزارش مدیر</button>
-            <button class="tab-button" onclick="openTab('records-search-tab')">گزارش سوابق</button>
-        </div>
-
-        <div id="absence-tab" class="tab-content active">
-            <div class="controls">
-                <div class="filter-group">
-                    <label for="grade-filter">پایه:</label>
-                    <select id="grade-filter"><option value="">همه</option></select>
-                </div>
-                <div class="filter-group">
-                    <label for="class-filter">کلاس:</label>
-                    <select id="class-filter"><option value="">همه</option></select>
-                </div>
-            </div>
-            
-            <div id="students-list">درحال بارگذاری لیست دانش‌آموزان...</div>
-            
-            <button id="submit-btn" disabled>✅ ثبت غیبت دانش‌آموزان انتخاب شده</button>
-            <div id="status-message"></div>
-        </div>
-
-        <div id="manager-report-tab" class="tab-content">
-            <h2>گزارش غایبین امروز (برای کپی و ارسال)</h2>
-            <button id="copy-manager-report-btn" style="margin-top: 15px; background: #28a745;">📋 کپی لیست غایبین امروز</button>
-            <pre id="manager-report-content">لیست غایبین بر اساس انتخاب شما در تب "ثبت غیبت" تولید و اینجا نمایش داده می‌شود.</pre>
-        </div>
-
-        <div id="records-search-tab" class="tab-content">
-            <h2>جستجوی سوابق غیبت دانش‌آموز</h2>
-            <div class="search-controls">
-                <input type="text" id="records-search-input" placeholder="نام یا نام خانوادگی دانش‌آموز را وارد کنید">
-                <button id="search-records-btn" style="background: #ffc107; color: #333;">🔍 جستجو</button>
-            </div>
-            <div id="records-search-result">نتایج جستجو (تعداد غیبت‌های قبلی) اینجا نمایش داده می‌شود.</div>
-        </div>
-
-    </div>
-
-    <script>
+<script>
         // ⚠️ مهم: این آدرس Apps Script باید با آدرس منتشر شده خودتان جایگزین شود
         const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbx5-XlYeSRCoYnImDxbqqrcTZMFLYvx0g6E1ZkER_wgY1yhvgkQYUyZfbnv2pe6fdyL/exec'; 
 
@@ -102,12 +10,13 @@
             document.querySelectorAll('.tab-button').forEach(button => button.classList.remove('active'));
             document.getElementById(tabName).classList.add('active');
             document.querySelector(`button[onclick="openTab('${tabName}')"]`).classList.add('active');
+            if (tabName === 'absence-tab') { renderStudentsList(); } // برای به‌روزرسانی لیست هنگام برگشت به این تب
             if (tabName === 'manager-report-tab') { generateManagerReport(); }
             if (tabName === 'records-search-tab') { document.getElementById('records-search-result').innerHTML = 'نتایج جستجو (تعداد غیبت‌های قبلی) اینجا نمایش داده می‌شود.'; }
         }
         
         async function loadData() {
-            // 🛑 رفع مشکل عدم خواندن list.csv در GitHub Pages: داده‌ها مستقیماً اینجا جاسازی شدند.
+            // 🛑 محتویات CSV از متغیر csvText خوانده می‌شود
             const csvText = `
 id,نام,نام خانوادگی,پایه,کلاس,معلم
 1,علی اصغر,بیکدلی,سوم,3,خانم نویدی
@@ -552,14 +461,14 @@ id,نام,نام خانوادگی,پایه,کلاس,معلم
 440,امیرعلی,همایونی,اول,1,خانم زرگوش
 441,امیرعلی,مزرعه,اول,3,خانم نظری
 442,فرامرز,عظیمی,سوم,6,خانم تاجیک
-    `;
+    `;
             
             try {
                 // 🛑 محتویات CSV از متغیر csvText خوانده می‌شود
                 const rows = csvText.split('\n').filter(row => row.trim() !== '').slice(1);
                 
                 allStudents = rows.map((row) => {
-                    // split بر اساس کاما (,) یا نقطه ویرگول (;) 
+                    // split بر اساس کاما (,) یا نقطه ویرگول (;) 
                     // ✅ با توجه به داده‌های شما، از **کاما (,)** استفاده می‌شود
                     const columns = row.split(',').map(col => col.trim().replace(/"/g, ''));
                     
@@ -572,14 +481,14 @@ id,نام,نام خانوادگی,پایه,کلاس,معلم
                     const teacherIndex = 5;
 
                     return {
-                        id: columns[idIndex] || Math.random(), 
+                        id: columns[idIndex] || Math.random().toString(36).substring(7), 
                         firstName: columns[nameIndex] || '',
                         lastName: columns[lastNameIndex] || '',
                         grade: columns[gradeIndex] || '',
                         classNumber: columns[classNumberIndex] || '',
                         teacher: columns[teacherIndex] || ''
                     };
-                }).filter(s => s.firstName && s.lastName);
+                }).filter(s => s.firstName && s.lastName && s.grade && s.classNumber);
 
                 populateFilters();
                 renderStudentsList();
@@ -593,8 +502,9 @@ id,نام,نام خانوادگی,پایه,کلاس,معلم
         function populateFilters() {
             const gradeFilter = document.getElementById('grade-filter');
             const classFilter = document.getElementById('class-filter');
-            const grades = new Set(allStudents.map(s => s.grade).filter(g => g));
-            const classNumbers = new Set(allStudents.map(s => s.classNumber).filter(c => c));
+            // گرفتن لیست منحصر به فرد (Unique) پایه‌ها و کلاس‌ها
+            const grades = [...new Set(allStudents.map(s => s.grade).filter(g => g))].sort((a, b) => a.localeCompare(b, 'fa', { numeric: true }));
+            const classNumbers = [...new Set(allStudents.map(s => s.classNumber).filter(c => c))].sort((a, b) => a.localeCompare(b, 'fa', { numeric: true }));
             
             gradeFilter.innerHTML = '<option value="">همه</option>';
             grades.forEach(grade => { const option = document.createElement('option'); option.value = grade; option.textContent = grade; gradeFilter.appendChild(option); });
@@ -630,9 +540,11 @@ id,نام,نام خانوادگی,پایه,کلاس,معلم
             filteredStudents.forEach((student, index) => {
                 const item = document.createElement('div');
                 item.className = 'student-item';
-                item.dataset.studentId = student.id;
+                // استفاده از ID یا ترکیب نام و نام خانوادگی به عنوان داده‌ی کلیدی
+                const studentKey = student.id; 
+                item.dataset.studentId = studentKey;
 
-                if (selectedStudents.has(student.id)) { item.classList.add('selected'); }
+                if (selectedStudents.has(studentKey)) { item.classList.add('selected'); }
 
                 item.innerHTML = `
                     <div class="student-info">
@@ -642,7 +554,7 @@ id,نام,نام خانوادگی,پایه,کلاس,معلم
                     <span class="student-index">${index + 1}</span>
                 `;
                 
-                item.addEventListener('click', () => toggleSelection(student.id, item));
+                item.addEventListener('click', () => toggleSelection(studentKey, item));
                 listContainer.appendChild(item);
             });
 
@@ -713,89 +625,82 @@ id,نام,نام خانوادگی,پایه,کلاس,معلم
         }
 
         function updateDateDisplay() {
-            // ✅ رفع خطای date is not defined
             const date = new JDate(); 
-            const formattedDate = date.format('yyyy/mm/dd (W)');
-            document.getElementById('date-display').textContent = `تاریخ امروز: ${formattedDate}`;
+            document.getElementById('date-display').textContent = `تاریخ امروز: ${date.format('dddd، jD jMMMM jYYYY')}`;
         }
-        
-        function generateManagerReport() {
-            const container = document.getElementById('manager-report-content');
-            if (selectedStudents.size === 0) { container.textContent = '❌ هنوز هیچ دانش‌آموزی برای غیبت انتخاب نشده است.'; return; }
 
+        // توابع تب گزارش‌گیری که در کد اولیه شما کامل نبود
+        function generateManagerReport() {
+            const reportContent = document.getElementById('manager-report-content');
             const absentStudents = Array.from(selectedStudents).map(id => allStudents.find(s => s.id === id)).filter(s => s);
-            // ✅ رفع خطای date is not defined
-            const currentDate = new JDate().format('yyyy/mm/dd'); 
-            let report = `✅ گزارش غایبین مورخ ${currentDate}:\n\n`;
             
-            // گروه بندی بر اساس پایه و کلاس
-            const grouped = absentStudents.reduce((acc, student) => {
-                const key = `پایه ${student.grade} / کلاس ${student.classNumber} (معلم: ${student.teacher})`;
+            if (absentStudents.length === 0) {
+                reportContent.textContent = 'هیچ دانش‌آموزی برای امروز غایب انتخاب نشده است.';
+                return;
+            }
+
+            // گروه‌بندی بر اساس کلاس برای گزارش منظم‌تر
+            const groupedAbsents = absentStudents.reduce((acc, student) => {
+                const key = `پایه ${student.grade} / کلاس ${student.classNumber} (${student.teacher})`;
                 if (!acc[key]) { acc[key] = []; }
-                acc[key].push(student);
+                acc[key].push(`${student.firstName} ${student.lastName}`);
                 return acc;
             }, {});
 
-            Object.keys(grouped).sort().forEach(key => {
-                report += `📋 ${key}:\n`;
-                grouped[key].sort((a, b) => a.lastName.localeCompare(b.lastName, 'fa'));
-                grouped[key].forEach((s, i) => { report += `   ${i + 1}. ${s.firstName} ${s.lastName}\n`; });
-                report += `\n`;
-            });
-            
-            report += `─────────────────────────────\n`;
-            report += `🙏 لطفاً در اسرع وقت جهت پیگیری اقدام نمایید.`;
-            container.textContent = report;
+            let reportText = `**غایبین امروز - ${new JDate().format('dddd، jD jMMMM jYYYY')}**\n\n`;
+            for (const [classKey, students] of Object.entries(groupedAbsents)) {
+                reportText += `--- ${classKey} ---\n`;
+                reportText += students.sort((a, b) => a.localeCompare(b, 'fa')).map((name, index) => `${index + 1}. ${name}`).join('\n');
+                reportText += '\n\n';
+            }
+            reportText += `**تعداد کل غایبین: ${absentStudents.length} نفر**`;
+
+            reportContent.textContent = reportText;
         }
 
-        document.getElementById('copy-manager-report-btn').addEventListener('click', function() {
-            const report = document.getElementById('manager-report-content').textContent;
-            if (report && !report.includes('❌ هنوز هیچ دانش‌آموزی')) {
-                navigator.clipboard.writeText(report).then(() => { alert('✅ گزارش غایبین امروز کپی شد!'); }).catch(() => { alert('❌ خطا در کپی کردن. لطفاً دوباره تلاش کنید.'); });
-            } else { alert('⚠️ ابتدا دانش‌آموزان غایب را انتخاب کنید.'); }
-        });
+        function copyManagerReport() {
+            const reportContent = document.getElementById('manager-report-content').textContent;
+            navigator.clipboard.writeText(reportContent).then(() => {
+                showMessage('گزارش کپی شد! 📋', 'success');
+            }).catch(err => {
+                console.error('Could not copy text: ', err);
+                showMessage('❌ خطا در کپی کردن متن.', 'error');
+            });
+        }
 
-        document.getElementById('search-records-btn').addEventListener('click', async function() {
-            const searchName = document.getElementById('records-search-input').value.trim();
-            const resultDiv = document.getElementById('records-search-result');
-            
-            if (searchName.length < 2) { resultDiv.innerHTML = 'لطفاً حداقل دو حرف برای جستجو وارد کنید.'; return; }
-            if (APPS_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbx5-XlYeSRCoYnImDxbqqrcTZMFLYvx0g6E1ZkER_wgY1yhvgkQYUyZfbnv2pe6fdyL/exec') { resultDiv.innerHTML = '❌ خطا: آدرس Apps Script را وارد نکرده‌اید.'; return; }
+        async function searchAbsenceRecords() {
+            const searchInput = document.getElementById('records-search-input').value.trim();
+            const resultContainer = document.getElementById('records-search-result');
+            if (!searchInput) {
+                resultContainer.innerHTML = 'لطفاً نام یا نام خانوادگی را برای جستجو وارد کنید.';
+                return;
+            }
+            if (APPS_SCRIPT_URL === 'https://script.google.com/macros/s/AKfycbx5-XlYeSRCoYnImDxbqqrcTZMFLYvx0g6E1ZkER_wgY1yhvgkQYUyZfbnv2pe6fdyL/exec') { resultContainer.innerHTML = '❌ لطفا آدرس Apps Script را برای فعال‌سازی جستجو وارد کنید!'; return; }
 
-            resultDiv.innerHTML = 'درحال جستجوی سوابق... ⌛';
+            resultContainer.innerHTML = 'درحال جستجوی سوابق... ⏳';
 
             try {
-                const url = APPS_SCRIPT_URL + '?action=getAbsenceCount&name=' + encodeURIComponent(searchName);
-                const response = await fetch(url);
-                const text = await response.text();
+                const response = await fetch(`${APPS_SCRIPT_URL}?action=searchAbsence&query=${encodeURIComponent(searchInput)}`);
+                const result = await response.json();
                 
-                let data;
-                try { data = JSON.parse(text); } catch (e) { resultDiv.innerHTML = `❌ خطا در دریافت پاسخ از سرور. (آدرس Apps Script را چک کنید)`; return; }
-
-                if (data.error) { resultDiv.innerHTML = `❌ خطا: ${data.error}`; } 
-                else if (data.count === undefined) { resultDiv.innerHTML = `❌ خطا: پاسخی از سرور دریافت نشد. (Apps Script را بررسی کنید)`; } 
-                else {
-                    // تلاش برای نمایش اطلاعات کامل دانش آموز از لیست محلی
-                    const studentInfo = allStudents.find(s => s.firstName.includes(searchName) || s.lastName.includes(searchName));
-                    const studentDisplay = studentInfo 
-                        ? `${studentInfo.firstName} ${studentInfo.lastName} (پایه: ${studentInfo.grade}، کلاس: ${studentInfo.classNumber}، معلم: ${studentInfo.teacher})` 
-                        : searchName;
-
-                    resultDiv.innerHTML = `
-                        تعداد کل غیبت‌های ثبت شده برای **${studentDisplay}**:
-                        <span class="result-count">${data.count}</span>
-                        <p style="font-size: 0.9em; color: #555; margin-top: 10px;">(این عدد از سوابق Google Sheets خوانده شده است.)</p>
-                    `;
+                if (result.error) {
+                    resultContainer.innerHTML = `❌ خطا: ${result.error}`;
+                } else if (result.count !== undefined) {
+                    resultContainer.innerHTML = `تعداد کل غیبت‌های یافت شده برای **${searchInput}**:<span class="result-count">${result.count}</span>`;
+                } else {
+                    resultContainer.innerHTML = 'هیچ سابقه غیبتی برای این دانش‌آموز یافت نشد.';
                 }
-            } catch (error) {
-                console.error('Error fetching records:', error);
-                resultDiv.innerHTML = '❌ خطای شبکه: مطمئن شوید Apps Script شما درست تنظیم شده و در حالت "Anyone" منتشر شده است.';
-            }
-        });
 
+            } catch (error) {
+                console.error('Error searching records:', error);
+                resultContainer.innerHTML = '❌ خطا در اتصال به سرور (Apps Script).';
+            }
+        }
+
+        // ⭐ توابع راه اندازی را در هنگام بارگذاری صفحه فراخوانی کنید ⭐
         updateDateDisplay();
         loadData();
-        openTab('absence-tab');
+        document.getElementById('search-records-btn').addEventListener('click', searchAbsenceRecords);
+        document.getElementById('records-search-input').addEventListener('keypress', function(e) { if (e.key === 'Enter') searchAbsenceRecords(); });
+        document.getElementById('copy-manager-report-btn').addEventListener('click', copyManagerReport);
     </script>
-</body>
-</html>
