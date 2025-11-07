@@ -108,8 +108,8 @@
         
         async function loadData() {
             try {
-                // 🔴 نام فایل CSV شما: list.csv
-                const response = await fetch('list.csv'); 
+                // 🔴 نام فایل CSV شما: index.csv
+                const response = await fetch('index.csv'); 
                 const csvText = await response.text();
                 
                 const rows = csvText.split('\n').filter(row => row.trim() !== '').slice(1);
@@ -352,4 +352,5 @@
         openTab('absence-tab');
     </script>
 </body>
+
 </html>
