@@ -22,18 +22,17 @@
             padding: 20px;
         }
         @keyframes gradientShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
+            0% { transform: scale(1.0); background-position: 0% 50%; }
+            50% { transform: scale(1.0); background-position: 100% 50%; }
+            100% { transform: scale(1.0); background-position: 0% 50%; }
         }
         .container {
-            background: rgba(255, 255, 255, 0.95);
+            background: #ffffff; 
             border-radius: 20px;
             padding: 30px;
             box-shadow: 0 20px 60px rgba(0,0,0,0.3);
             max-width: 900px;
             width: 100%;
-            backdrop-filter: blur(10px);
             border: 3px solid rgba(255, 255, 255, 0.5);
             max-height: 90vh;
             overflow-y: auto;
@@ -82,6 +81,13 @@
         }
         .btn-success:hover {
             box-shadow: 0 8px 25px rgba(255, 230, 109, 0.6);
+        }
+        .btn-danger {
+            background: linear-gradient(135deg, #FF6B6B 0%, #C92A2A 100%);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+        .btn-danger:hover {
+            box-shadow: 0 8px 25px rgba(255, 107, 107, 0.6);
         }
         .btn-small {
             width: auto;
@@ -166,6 +172,11 @@
         .info {
             background: #d1ecf1;
             color: #0c5460;
+        }
+        .warning {
+            background: #fff3cd;
+            color: #856404;
+            border: 2px solid #ffc107;
         }
         .loading {
             text-align: center;
@@ -307,10 +318,110 @@
             color: white;
             border-color: #FF6B9D;
         }
+        .delete-student-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            background: #f9f9f9;
+            border-radius: 8px;
+            margin: 8px 0;
+            border-right: 4px solid #FF6B9D;
+        }
+        .delete-student-info {
+            flex: 1;
+        }
+        .delete-btn-small {
+            background: linear-gradient(135deg, #FF6B6B 0%, #C92A2A 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+        .delete-btn-small:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 12px rgba(255, 107, 107, 0.5);
+        }
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+        }
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        }
+        .modal-content h3 {
+            color: #FF6B6B;
+            margin-bottom: 20px;
+        }
+        .modal-content p {
+            margin-bottom: 25px;
+            color: #555;
+            line-height: 1.6;
+        }
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        /* استایل جدید برای دکمه حذف در گزارش روز */
+        .delete-absence-btn {
+            background: linear-gradient(135deg, #FF6B6B 0%, #C92A2A 100%);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 15px;
+            cursor: pointer;
+            font-size: 13px;
+            transition: all 0.3s;
+            margin: 5px 0;
+            box-shadow: 0 3px 10px rgba(255, 107, 107, 0.4);
+        }
+        .delete-absence-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.6);
+        }
     </style>
 </head>
 <body>
-    <!-- Date Picker Modal -->
+    <div id="confirmModal" class="modal">
+        <div class="modal-content">
+            <h3>⚠️ تایید حذف</h3>
+            <p id="confirmMessage"></p>
+            <div class="modal-buttons">
+                <button class="btn btn-danger btn-small" onclick="confirmDelete()">بله، حذف شود</button>
+                <button class="btn btn-secondary btn-small" onclick="closeConfirmModal()">انصراف</button>
+            </div>
+        </div>
+    </div>
+
+    <div id="holidayModal" class="modal">
+        <div class="modal-content">
+            <h3>📅 هشدار تعطیلی</h3>
+            <p>امروز <span id="dayName"></span> است و مدرسه تعطیل می‌باشد.<br><br>آیا مطمئن هستید که می‌خواهید وارد پنل شوید؟</p>
+            <div class="modal-buttons">
+                <button class="btn btn-success btn-small" onclick="proceedToTeacherPanel()">بله، وارد شوم</button>
+                <button class="btn btn-secondary btn-small" onclick="closeHolidayModal()">انصراف</button>
+            </div>
+        </div>
+    </div>
+
     <div id="datePickerModal" class="date-picker-modal">
         <div class="date-picker-content">
             <div class="date-picker-header">
@@ -336,7 +447,6 @@
     </div>
 
     <div class="container">
-        <!-- صفحه اصلی -->
         <div id="homePage">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <img src="https://i.ibb.co/rGr1Fx6J/image.jpg" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid #FF6B9D; box-shadow: 0 5px 15px rgba(0,0,0,0.3); object-fit: cover;" alt="شهید حسن نیاسری">
@@ -347,12 +457,11 @@
                 <img src="https://i.ibb.co/LD1m3s5k/image.jpg" style="width: 80px; height: 80px; border-radius: 50%; border: 3px solid #FF6B9D; box-shadow: 0 5px 15px rgba(0,0,0,0.3); object-fit: cover;" alt="شهید حسن نیاسری">
             </div>
             <div class="button-group">
-                <button class="btn" onclick="showTeacherPanel()">ورود معلم</button>
+                <button class="btn" onclick="checkHolidayAndShowTeacher()">ورود معلم</button>
                 <button class="btn btn-secondary" onclick="showManagerLogin()">ورود مدیر</button>
             </div>
         </div>
 
-        <!-- پنل ورود مدیر -->
         <div id="managerLogin" class="hidden">
             <h2>ورود مدیر</h2>
             <div class="form-group">
@@ -366,7 +475,6 @@
             </div>
         </div>
 
-        <!-- پنل معلم -->
         <div id="teacherPanel" class="hidden">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <img src="https://i.ibb.co/rGr1Fx6J/image.jpg" style="width: 70px; height: 70px; border-radius: 50%; border: 3px solid #FF6B9D; box-shadow: 0 5px 15px rgba(0,0,0,0.3); object-fit: cover;" alt="شهید حسن نیاسری">
@@ -412,7 +520,6 @@
             </div>
         </div>
 
-        <!-- پنل مدیر -->
         <div id="managerPanel" class="hidden">
             <h2>پنل مدیریت</h2>
             <div class="button-group">
@@ -421,11 +528,47 @@
                 <button class="btn btn-secondary" onclick="showSearchPanel()">جستجوی پیشرفته</button>
                 <button class="btn" onclick="showStatistics()">آمار و نمودار</button>
                 <button class="btn btn-success" onclick="showAddStudent()">اضافه کردن دانش‌آموز</button>
+                <button class="btn btn-danger" onclick="showDeleteStudent()">حذف دانش‌آموز</button>
                 <button class="btn btn-secondary btn-small" onclick="showHome()">خروج</button>
             </div>
         </div>
 
-        <!-- گزارش روز -->
+        <div id="deleteStudentPanel" class="hidden">
+            <h2>حذف دانش‌آموز</h2>
+            <div class="form-group">
+                <label>جستجو:</label>
+                <input type="text" id="deleteSearchInput" placeholder="نام یا نام خانوادگی دانش‌آموز" oninput="filterDeleteList()">
+            </div>
+            <div class="select-row">
+                <div class="form-group">
+                    <label>پایه:</label>
+                    <select id="deleteGradeFilter" onchange="filterDeleteList()">
+                        <option value="">همه</option>
+                        <option value="اول">اول</option>
+                        <option value="دوم">دوم</option>
+                        <option value="سوم">سوم</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>کلاس:</label>
+                    <select id="deleteClassFilter" onchange="filterDeleteList()">
+                        <option value="">همه</option>
+                        <option value="1">1</option>
+                        <option value="2">2</option>
+                        <option value="3">3</option>
+                        <option value="4">4</option>
+                        <option value="5">5</option>
+                        <option value="6">6</option>
+                    </select>
+                </div>
+            </div>
+            <div id="deleteStudentList" class="student-list"></div>
+            <div id="deleteMessage" class="hidden"></div>
+            <div class="button-group">
+                <button class="btn btn-secondary btn-small" onclick="showManagerPanel()">بازگشت</button>
+            </div>
+        </div>
+
         <div id="dailyReport" class="hidden">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                 <img src="https://i.ibb.co/rGr1Fx6J/image.jpg" style="width: 70px; height: 70px; border-radius: 50%; border: 3px solid #FF6B9D; box-shadow: 0 5px 15px rgba(0,0,0,0.3); object-fit: cover;" alt="شهید حسن نیاسری">
@@ -440,27 +583,25 @@
             </div>
         </div>
 
-        <!-- گزارش کل -->
-        <div id="fullReport" class="hidden">
-            <h2>گزارش کل</h2>
-            <div class="select-row">
-                <div class="form-group">
-                    <label>از تاریخ:</label>
-                    <input type="text" id="fromDate" class="date-input" placeholder="1403/08/01" readonly onclick="showDatePicker('fromDate')">
-                </div>
-                <div class="form-group">
-                    <label>تا تاریخ:</label>
-                    <input type="text" id="toDate" class="date-input" placeholder="1403/08/30" readonly onclick="showDatePicker('toDate')">
-                </div>
+    <div id="fullReport" class="hidden">
+        <h2>گزارش کل</h2>
+        <div class="select-row">
+            <div class="form-group">
+                <label>از تاریخ:</label>
+                <input type="text" id="fromDate" class="date-input" placeholder="1403/08/01" readonly onclick="showDatePicker('fromDate')">
             </div>
-            <button class="btn btn-success" onclick="loadFullReport()">نمایش گزارش</button>
-            <div id="fullReportContent"></div>
-            <div class="button-group">
-                <button class="btn btn-secondary btn-small" onclick="showManagerPanel()">بازگشت</button>
+            <div class="form-group">
+                <label>تا تاریخ:</label>
+                <input type="text" id="toDate" class="date-input" placeholder="1403/08/30" readonly onclick="showDatePicker('toDate')">
             </div>
         </div>
+        <button class="btn btn-success" onclick="loadFullReport()">نمایش گزارش</button>
+        <div id="fullReportContent"></div>
+        <div class="button-group">
+            <button class="btn btn-secondary btn-small" onclick="showManagerPanel()">بازگشت</button>
+        </div>
+    </div>
 
-        <!-- جستجوی پیشرفته -->
         <div id="searchPanel" class="hidden">
             <h2>جستجوی پیشرفته</h2>
             <div class="form-group">
@@ -507,28 +648,26 @@
             </div>
         </div>
 
-        <!-- آمار و نمودار -->
-        <div id="statisticsPanel" class="hidden">
-            <h2>آمار و نمودار غیبت‌ها</h2>
-            <div class="select-row">
-                <div class="form-group">
-                    <label>از تاریخ:</label>
-                    <input type="text" id="statFromDate" class="date-input" placeholder="1403/08/01" readonly onclick="showDatePicker('statFromDate')">
-                </div>
-                <div class="form-group">
-                    <label>تا تاریخ:</label>
-                    <input type="text" id="statToDate" class="date-input" placeholder="1403/08/30" readonly onclick="showDatePicker('statToDate')">
-                </div>
+    <div id="statisticsPanel" class="hidden">
+        <h2>آمار و نمودار غیبت‌ها</h2>
+        <div class="select-row">
+            <div class="form-group">
+                <label>از تاریخ:</label>
+                <input type="text" id="statFromDate" class="date-input" placeholder="1403/08/01" readonly onclick="showDatePicker('statFromDate')">
             </div>
-            <button class="btn btn-success" onclick="loadStatistics()">نمایش آمار</button>
-            <div id="statisticsContent"></div>
-            <div class="button-group">
-                <button class="btn btn-success btn-small" onclick="exportToExcel()">دانلود Excel</button>
-                <button class="btn btn-secondary btn-small" onclick="showManagerPanel()">بازگشت</button>
+            <div class="form-group">
+                <label>تا تاریخ:</label>
+                <input type="text" id="statToDate" class="date-input" placeholder="1403/08/30" readonly onclick="showDatePicker('statToDate')">
             </div>
         </div>
+        <button class="btn btn-success" onclick="loadStatistics()">نمایش آمار</button>
+        <div id="statisticsContent"></div>
+        <div class="button-group">
+            <button class="btn btn-success btn-small" onclick="exportToExcel()">دانلود Excel</button>
+            <button class="btn btn-secondary btn-small" onclick="showManagerPanel()">بازگشت</button>
+        </div>
+    </div>
 
-        <!-- اضافه کردن دانش‌آموز -->
         <div id="addStudentPanel" class="hidden">
             <h2>اضافه کردن دانش‌آموز</h2>
             <div class="form-group">
@@ -571,16 +710,63 @@
     </div>
 
     <script>
-        // URL اسکریپت Google Apps Script
-        const SHEET_URL = 'https://script.google.com/macros/s/AKfycbxJig2TKLfOmMxgYmZCd0QtaDqdRBK-95p85cLRmMf1c_GmH9LEQu7X0XxiLDW9QW7AHg/exec';
+        const SHEET_URL = 'https://script.google.com/macros/s/AKfycbwygevr4OTNo3VRn0832c5_qxvfzGVRERqCpTUxRa_zot1nX60Xk1r89kdPcnScrlm-bg/exec';
         
         let students = [];
         let currentAbsent = new Set();
         let currentStatistics = null;
         let currentDatePickerTarget = null;
+        let studentToDelete = null;
+window.pendingDeletion = null;
 
         const persianMonths = ['فروردین', 'اردیبهشت', 'خرداد', 'تیر', 'مرداد', 'شهریور', 
                               'مهر', 'آبان', 'آذر', 'دی', 'بهمن', 'اسفند'];
+        
+        const persianDays = ['یکشنبه', 'دوشنبه', 'سه‌شنبه', 'چهارشنبه', 'پنجشنبه', 'جمعه', 'شنبه'];
+
+        // اضافه کردن تعطیلات رسمی
+        const officialHolidays = [
+            '1403/01/01', '1403/01/02', '1403/01/03', '1403/01/04', // عید نوروز
+            '1403/01/12', '1403/01/13', // روز جمهوری اسلامی
+            '1403/03/14', '1403/03/15', // رحلت حضرت امام
+            '1403/04/14', // قیام 15 خرداد
+            '1403/06/03', '1403/06/04', // عید فطر
+            '1403/08/10', '1403/08/11', // عید قربان
+            '1403/08/18', // عید غدیر
+            '1403/10/20', // تاسوعا
+            '1403/10/21', // عاشورا
+            '1403/12/29', // شهادت پیامبر
+            '1404/01/01', '1404/01/02', '1404/01/03', '1404/01/04', // عید نوروز
+        ];
+
+        function isOfficialHoliday(date) {
+            const normalizedDate = date.replace(/\//g, '/');
+            return officialHolidays.includes(normalizedDate);
+        }
+
+        function checkHolidayAndShowTeacher() {
+            const today = new Date().toLocaleDateString('fa-IR');
+            
+            // بررسی تعطیلات رسمی
+            if (isOfficialHoliday(today)) {
+                document.getElementById('dayName').textContent = 'تعطیل رسمی';
+                document.getElementById('holidayModal').querySelector('p').textContent = 
+                    'امروز تعطیلات رسمی است و مدرسه تعطیل می‌باشد.\n\nآیا مطمئن هستید که می‌خواهید وارد پنل شوید؟';
+                document.getElementById('holidayModal').style.display = 'flex';
+                return;
+            }
+            
+            // بررسی پنجشنبه و جمعه
+            if (isHoliday()) {
+                const dayName = getPersianDayOfWeek();
+                document.getElementById('dayName').textContent = dayName;
+                document.getElementById('holidayModal').querySelector('p').textContent = 
+                    `امروز ${dayName} است و مدرسه تعطیل می‌باشد.\n\nآیا مطمئن هستید که می‌خواهید وارد پنل شوید؟`;
+                document.getElementById('holidayModal').style.display = 'flex';
+            } else {
+                showTeacherPanel();
+            }
+        }
 
         window.addEventListener('load', () => {
             fetchStudents();
@@ -609,7 +795,6 @@
         }
 
         function updateMonthPicker() {
-            // Reset day grid
             document.getElementById('dayGrid').innerHTML = '';
         }
 
@@ -634,6 +819,26 @@
             
             document.getElementById(currentDatePickerTarget).value = formattedDate;
             closeDatePicker();
+        }
+
+        function getPersianDayOfWeek() {
+            const now = new Date();
+            return persianDays[now.getDay()];
+        }
+
+        function isHoliday() {
+            const now = new Date();
+            const dayOfWeek = now.getDay();
+            return dayOfWeek === 4 || dayOfWeek === 5; // پنجشنبه = 4, جمعه = 5
+        }
+
+        function proceedToTeacherPanel() {
+            closeHolidayModal();
+            showTeacherPanel();
+        }
+
+        function closeHolidayModal() {
+            document.getElementById('holidayModal').style.display = 'none';
         }
 
         async function callAPI(action, data = {}) {
@@ -709,9 +914,16 @@
             document.getElementById('addStudentPanel').classList.remove('hidden');
         }
 
+        function showDeleteStudent() {
+            hideAll();
+            document.getElementById('deleteStudentPanel').classList.remove('hidden');
+            loadDeleteStudentList();
+        }
+
         function hideAll() {
             const pages = ['homePage', 'managerLogin', 'teacherPanel', 'managerPanel', 
-                          'dailyReport', 'fullReport', 'searchPanel', 'addStudentPanel', 'statisticsPanel'];
+                          'dailyReport', 'fullReport', 'searchPanel', 'addStudentPanel', 
+                          'statisticsPanel', 'deleteStudentPanel'];
             pages.forEach(page => {
                 document.getElementById(page).classList.add('hidden');
             });
@@ -890,6 +1102,120 @@
             msg.classList.remove('hidden');
         }
 
+        // تابع جدید برای حذف غیبت ثبت شده
+        async function deleteAbsence(grade, classNum, date) {
+            const confirmMessage = `آیا مطمئن هستید که می‌خواهید غیبت پایه ${grade} کلاس ${classNum} را در تاریخ ${date} حذف کنید؟`;
+            
+            // استفاده از مودال تایید موجود
+            document.getElementById('confirmMessage').textContent = confirmMessage;
+            document.getElementById('confirmModal').style.display = 'flex';
+            
+            // ذخیره اطلاعات برای استفاده در تابع confirmDelete
+            window.pendingDeletion = {
+                grade: grade,
+                classNum: classNum,
+                date: date,
+                type: 'absence' // اضافه کردن نوع برای تشخیص
+            };
+        }
+
+// تابع ساده شده برای حذف
+async function confirmDelete() {
+    const modal = document.getElementById('confirmModal');
+    modal.style.display = 'none';
+    
+    // اگر چیزی برای حذف نداریم، برگرد
+    if (!window.pendingDeletion) {
+        return;
+    }
+    
+    // حذف غیبت
+    if (window.pendingDeletion.grade && window.pendingDeletion.classNum && window.pendingDeletion.date) {
+        const { grade, classNum, date } = window.pendingDeletion;
+        const result = await callAPI('deleteAbsence', {
+            grade: grade,
+            class: classNum,
+            date: date
+        });
+        
+        if (result.success) {
+            alert('غیبت با موفقیت حذف شد ✅');
+            loadDailyReport(); // بارگذاری مجدد گزارش
+        } else {
+            alert('خطا در حذف غیبت: ' + (result.message || 'خطای ناشناخته'));
+        }
+    }
+    // حذف دانش‌آموز
+    else if (window.pendingDeletion.name && window.pendingDeletion.family) {
+        const { name, family, grade, class: classNum } = window.pendingDeletion;
+        const result = await callAPI('deleteStudent', {
+            name: name,
+            family: family,
+            grade: grade,
+            class: classNum
+        });
+
+        if (result.success) {
+            showMessage('deleteMessage', 'دانش‌آموز با موفقیت حذف شد ✅', 'success');
+            
+            students = students.filter(s => 
+                !(s.name === name && 
+                  s.family === family && 
+                  s.grade === grade && 
+                  s.class === classNum)
+            );
+            
+            filterDeleteList();
+            
+            setTimeout(() => {
+                document.getElementById('deleteMessage').classList.add('hidden');
+            }, 3000);
+        } else {
+            showMessage('deleteMessage', result.message || 'خطا در حذف دانش‌آموز', 'error');
+        }
+    }
+    
+    window.pendingDeletion = null;
+}
+
+// تابع برای حذف غیبت
+async function deleteAbsence(grade, classNum, date) {
+    const confirmMessage = `آیا مطمئن هستید که می‌خواهید غیبت پایه ${grade} کلاس ${classNum} را در تاریخ ${date} حذف کنید؟`;
+    
+    document.getElementById('confirmMessage').textContent = confirmMessage;
+    document.getElementById('confirmModal').style.display = 'flex';
+    
+    // ذخیره اطلاعات ساده بدون type
+    window.pendingDeletion = {
+        grade: grade,
+        classNum: classNum,
+        date: date
+    };
+}
+
+// تابع برای حذف دانش‌آموز
+function confirmDeleteStudent(name, family, grade, classNum) {
+    const confirmMessage = `آیا مطمئن هستید که می‌خواهید "${name} ${family}" از پایه ${grade} کلاس ${classNum} را حذف کنید؟`;
+    
+    document.getElementById('confirmMessage').textContent = confirmMessage;
+    document.getElementById('confirmModal').style.display = 'flex';
+    
+    // ذخیره اطلاعات ساده بدون type
+    window.pendingDeletion = {
+        name: name,
+        family: family,
+        grade: grade,
+        class: classNum
+    };
+}
+
+// تابع بستن مودال
+function closeConfirmModal() {
+    document.getElementById('confirmModal').style.display = 'none';
+    window.pendingDeletion = null;
+}
+
+        // تابع اصلاح شده برای بارگذاری گزارش روز
         async function loadDailyReport() {
             const contentDiv = document.getElementById('dailyReportContent');
             const dateDiv = document.getElementById('dailyReportDate');
@@ -923,6 +1249,13 @@
                                   a.teacher.includes('نرگس') || a.teacher.includes('الهام') ? '👩‍🏫' : '👨‍🏫';
                 
                 html += `<div class="class-header">پایه ${a.grade} کلاس ${a.class} - ${genderIcon} ${a.teacher} - ⏰ ساعت ${a.time}</div>`;
+                
+                // اضافه کردن دکمه حذف
+                html += `<div style="text-align: left; margin: 10px 0;">
+                            <button class="delete-absence-btn" onclick="deleteAbsence('${a.grade}', '${a.class}', '${a.date}')">
+                                🗑️ حذف این ثبت غیبت
+                            </button>
+                         </div>`;
                 
                 if (a.students.length > 0) {
                     html += `<div class="absence-list">`;
@@ -1135,7 +1468,6 @@
             const contentDiv = document.getElementById('statisticsContent');
             let html = '';
 
-            // نمودار دانش‌آموزان با بیشترین غیبت
             if (data.students && data.students.length > 0) {
                 html += `<div class="stat-card">`;
                 html += `<h3>🔴 دانش‌آموزان با بیشترین غیبت</h3>`;
@@ -1155,7 +1487,6 @@
                 html += `</div></div>`;
             }
 
-            // نمودار کلاس‌ها با بیشترین غیبت
             if (data.classes && data.classes.length > 0) {
                 html += `<div class="stat-card">`;
                 html += `<h3>📊 کلاس‌ها با بیشترین غیبت</h3>`;
@@ -1187,7 +1518,6 @@
                 return;
             }
 
-            // BOM برای فارسی
             let csv = '\ufeff';
             csv += 'ردیف,نام و نام خانوادگی,پایه,کلاس,تعداد غیبت\n';
             
@@ -1244,7 +1574,64 @@
                 showMessage('addStudentMessage', result.message || 'خطا در ثبت اطلاعات', 'error');
             }
         }
+
+        async function loadDeleteStudentList() {
+            await fetchStudents();
+            filterDeleteList();
+        }
+
+        function filterDeleteList() {
+            const searchTerm = document.getElementById('deleteSearchInput').value.toLowerCase();
+            const gradeFilter = document.getElementById('deleteGradeFilter').value;
+            const classFilter = document.getElementById('deleteClassFilter').value;
+            
+            let filtered = students.filter(s => {
+                const fullName = `${s.name} ${s.family}`.toLowerCase();
+                const matchName = !searchTerm || fullName.includes(searchTerm);
+                const matchGrade = !gradeFilter || s.grade === gradeFilter;
+                const matchClass = !classFilter || s.class === classFilter;
+                
+                return matchName && matchGrade && matchClass;
+            });
+
+            filtered.sort((a, b) => {
+                const gradeOrder = {اول: 1, دوم: 2, سوم: 3};
+                if (gradeOrder[a.grade] !== gradeOrder[b.grade]) {
+                    return gradeOrder[a.grade] - gradeOrder[b.grade];
+                }
+                if (parseInt(a.class) !== parseInt(b.class)) {
+                    return parseInt(a.class) - parseInt(b.class);
+                }
+                return a.family.localeCompare(b.family, 'fa');
+            });
+
+            const listDiv = document.getElementById('deleteStudentList');
+            
+            if (filtered.length === 0) {
+                listDiv.innerHTML = '<p class="message info">دانش‌آموزی یافت نشد</p>';
+                return;
+            }
+
+            listDiv.innerHTML = filtered.map((s, i) => `
+                <div class="delete-student-item">
+                    <div class="delete-student-info">
+                        <strong>${i + 1}. ${s.name} ${s.family}</strong><br>
+                        <span style="color: #666; font-size: 13px;">پایه ${s.grade} - کلاس ${s.class}${s.teacher ? ' - معلم: ' + s.teacher : ''}</span>
+                    </div>
+                    <button class="delete-btn-small" onclick="confirmDeleteStudent('${s.name}', '${s.family}', '${s.grade}', '${s.class}')">🗑️ حذف</button>
+                </div>
+            `).join('');
+        }
+
+        function confirmDeleteStudent(name, family, grade, classNum) {
+            window.pendingDeletion = {name, family, grade, class: classNum, type: 'student'};
+            document.getElementById('confirmMessage').textContent = `آیا مطمئن هستید که می‌خواهید "${name} ${family}" از پایه ${grade} کلاس ${classNum} را حذف کنید؟`;
+            document.getElementById('confirmModal').style.display = 'flex';
+        }
+        
+        // اطمینان از اینکه showHome در ابتدا اجرا شود
+        document.addEventListener('DOMContentLoaded', showHome);
+
     </script>
 </body>
 </html>
-
